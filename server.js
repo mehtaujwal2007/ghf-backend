@@ -6,9 +6,6 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-// Routes
-import contactRoutes from './routes/contact.js'; // make sure file is exactly contact.js (lowercase)
-
 dotenv.config();
 const app = express();
 
@@ -103,11 +100,6 @@ const verifyToken = (req, res, next) => {
 app.get('/api/protected', verifyToken, (req, res) => {
   res.json({ message: "Protected data accessed", userId: req.user.id, role: req.user.role });
 });
-
-// --------------------
-// Contact Routes
-// --------------------
-app.use('/api', contactRoutes); // handles /api/contact POST
 
 // --------------------
 // 404 Route
