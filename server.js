@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 // Routes
-import contactRoutes from './routes/contact.js';
+import contactRoutes from './routes/contact.js'; // make sure file is exactly contact.js (lowercase)
 
 dotenv.config();
 const app = express();
@@ -20,10 +20,13 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+})
+.then(() => console.log("✅ MongoDB connected"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
-// User Schema (with optional role)
+// --------------------
+// User Schema
+// --------------------
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -33,10 +36,11 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// ✅ Signup Route
+// --------------------
+// Signup Route
+// --------------------
 app.post('/api/user/signup', async (req, res) => {
   const { name, email, password, role } = req.body;
-
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
@@ -51,10 +55,11 @@ app.post('/api/user/signup', async (req, res) => {
   }
 });
 
-// ✅ Login Route
+// --------------------
+// Login Route
+// --------------------
 app.post('/api/user/login', async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
@@ -74,32 +79,46 @@ app.post('/api/user/login', async (req, res) => {
   }
 });
 
-// ✅ Protected Route Example
-app.get('/api/protected', (req, res) => {
+// --------------------
+// JWT Middleware
+// --------------------
+const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized - Missing token" });
   }
-
   const token = authHeader.split(" ")[1];
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ message: "Protected data accessed", userId: decoded.id });
+    req.user = decoded;
+    next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
+};
+
+// --------------------
+// Protected Route Example
+// --------------------
+app.get('/api/protected', verifyToken, (req, res) => {
+  res.json({ message: "Protected data accessed", userId: req.user.id, role: req.user.role });
 });
 
-// ✅ Contact Route
+// --------------------
+// Contact Routes
+// --------------------
 app.use('/api', contactRoutes); // handles /api/contact POST
 
-// ❌ 404 Route
+// --------------------
+// 404 Route
+// --------------------
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// --------------------
 // Start Server
+// --------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
