@@ -1,0 +1,24 @@
+{
+  "name": "secure-auth-backend",
+  "version": "1.0.0",
+  "description": "Secure backend with JWT and bcrypt",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.1",
+    "mongoose": "^7.8.7",
+    "multer": "^2.0.1",
+    "react-router-dom": "^7.6.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
